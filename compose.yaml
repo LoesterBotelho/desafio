@@ -1,0 +1,49 @@
+services:
+
+  postgresql:
+    image: postgres:17-alpine
+    container_name: desafio-postgresql
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: desafio
+      POSTGRES_USER: desafio
+      POSTGRES_PASSWORD: desafio
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    networks:
+      - desafio-network
+
+  backend:
+    image: loesterbotelho/desafio-backend:1.0.0
+    container_name: desafio-backend
+    restart: unless-stopped
+    depends_on:
+      - postgresql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/desafio
+      SPRING_DATASOURCE_USERNAME: desafio
+      SPRING_DATASOURCE_PASSWORD: desafio
+    ports:
+      - "8080:8080"
+    networks:
+      - desafio-network
+
+  frontend:
+    image: loesterbotelho/desafio-frontend:1.0.0
+    container_name: desafio-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - desafio-network
+
+volumes:
+  postgresql_data:
+
+networks:
+  desafio-network:
+    driver: bridge
